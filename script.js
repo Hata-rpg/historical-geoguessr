@@ -1,15 +1,3 @@
-// --- Firebase 初期化 ---
-let db;
-try {
-    // db is initialized in index.html using the compat library
-    db = firebase.firestore();
-    console.log("Firebase initialized successfully");
-} catch (e) {
-    console.error("Firebase initialization failed:", e);
-    db = null; // Ensure db is null on failure
-}
-
-
 (function() {
     const style = document.createElement('style');
     style.innerHTML = `
@@ -158,22 +146,6 @@ const loadingOverlay = document.getElementById('loading-overlay');
 const storyListContainer = document.getElementById('story-list-container');
 const storyContentContainer = document.getElementById('story-content-container');
 
-// --- ランキング関連のDOM要素 ---
-const rankingButton = document.getElementById('ranking-button');
-const rankingModal = document.getElementById('ranking-modal');
-const closeRankingModalButton = document.getElementById('close-ranking-modal-button');
-const rankingList = document.getElementById('ranking-list');
-const rankingLoader = document.getElementById('ranking-loader');
-const rankingError = document.getElementById('ranking-error');
-
-// --- スコア登録関連のDOM要素 ---
-const scoreSubmissionUI = document.getElementById('score-submission-ui');
-const scoreSubmissionForm = document.getElementById('score-submission-form');
-const playerNameInput = document.getElementById('player-name-input');
-const submitScoreButton = document.getElementById('submit-score-button');
-const submissionMessage = document.getElementById('submission-message');
-
-
 // --- ゲーム状態変数 ---
 let map;
 let playerMarker = null;
@@ -210,7 +182,6 @@ let timeAttackRemainingTime = 120;
 
 let answered = false;
 let isTimerSEPlaying = false;
-let scoreSubmitted = false; // スコアが登録されたかどうかのフラグ
 
 let useCompass = true;
 let compassWobbleInterval = null;
@@ -489,7 +460,6 @@ function startGame(mode) {
     startScreen.classList.add('hidden');
     resultScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
-    scoreSubmissionUI.classList.add('hidden'); // スコア登録UIを非表示にリセット
     cleanUpTitleScreenEffects();
 
     if (!map) initMap();
@@ -712,7 +682,6 @@ function showResults() {
         resultTitle.textContent = "調査完了";
         resultStoryTitle.textContent = `— ${currentStory.title} —`;
         resultStoryTitle.classList.remove('hidden');
-        scoreSubmissionUI.classList.add('hidden'); // ストーリーモードでは非表示
         chapterResults.forEach((result, index) => {
             const scoreColorClass = result.score < 0 ? 'text-red-600' : '';
             const resultElement = document.createElement('div');
@@ -758,17 +727,6 @@ function showResults() {
          summaryElement.innerHTML = `<p>回答数: <span class="font-bold">${answeredCount}問</span></p>`;
          resultsSummary.appendChild(summaryElement);
          
-         // スコアが0より大きい場合のみ登録UIを表示
-         if (totalScore > 0 && db) {
-            scoreSubmitted = false;
-            submissionMessage.textContent = '';
-            playerNameInput.value = '';
-            submitScoreButton.disabled = false;
-            scoreSubmissionUI.classList.remove('hidden');
-         } else {
-            scoreSubmissionUI.classList.add('hidden');
-         }
-
          checkAndUnlockAchievements('final', { gameMode: 'timeAttack', totalScore: totalScore, chapterResults: chapterResults, useCompass: useCompass });
     }
 }
@@ -1073,100 +1031,6 @@ function hideStoryLogScreen() {
     setupTitleScreenEffects();
 }
 
-
-// --- ランキング関連の関数 ---
-async function showRanking() {
-    if (!db) {
-        alert("ランキング機能は現在利用できません。");
-        return;
-    }
-
-    playSE(sounds.se.b4);
-    rankingModal.classList.remove('hidden');
-    rankingList.innerHTML = '';
-    rankingError.classList.add('hidden');
-    rankingLoader.classList.remove('hidden');
-
-    try {
-        const q = db.collection("rankings").orderBy("score", "desc").limit(50);
-        const querySnapshot = await q.get();
-        
-        if (querySnapshot.empty) {
-            rankingList.innerHTML = '<li>まだ誰もランキングに登録していません。一番乗りを目指そう！</li>';
-        } else {
-            let rank = 1;
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                const date = data.timestamp?.toDate().toLocaleDateString() || '日付不明';
-                const version = data.version ? `(v${data.version})` : '';
-                const rankIcons = ['fa-trophy text-yellow-500', 'fa-medal text-gray-400', 'fa-award text-yellow-700'];
-                const icon = rank <= 3 ? `<i class="fas ${rankIcons[rank - 1]} w-6 text-center"></i>` : `<span class="w-6 text-center font-bold">${rank}</span>`;
-
-                const li = document.createElement('li');
-                li.className = 'flex items-center p-2 bg-white bg-opacity-50 rounded-md';
-                li.innerHTML = `
-                    ${icon}
-                    <span class="font-bold ml-4 flex-grow">${escapeHTML(data.name)}</span>
-                    <span class="mr-4 text-lg font-semibold">${data.score.toLocaleString()}点</span>
-                    <span class="text-sm text-gray-600">${date} ${version}</span>
-                `;
-                rankingList.appendChild(li);
-                rank++;
-            });
-        }
-    } catch (error) {
-        console.error("Error getting documents: ", error);
-        rankingError.classList.remove('hidden');
-    } finally {
-        rankingLoader.classList.add('hidden');
-    }
-}
-
-// スコアをFirebaseに登録する関数
-async function submitScore(e) {
-    e.preventDefault();
-    if (scoreSubmitted || !db) return;
-
-    const playerName = playerNameInput.value.trim();
-    if (!playerName) {
-        submissionMessage.textContent = '名前を入力してください。';
-        submissionMessage.className = 'mt-2 h-5 text-red-600';
-        return;
-    }
-
-    // NGワードフィルター
-    const isProfane = profanityList.some(word => playerName.toLowerCase().includes(word));
-    if (isProfane) {
-        submissionMessage.textContent = '不適切な単語が含まれています。';
-        submissionMessage.className = 'mt-2 h-5 text-red-600';
-        return;
-    }
-
-
-    submitScoreButton.disabled = true;
-    submissionMessage.textContent = 'スコアを登録中...';
-    submissionMessage.className = 'mt-2 h-5 text-gray-600';
-
-    try {
-        await db.collection("rankings").add({
-            name: playerName,
-            score: totalScore,
-            version: GAME_VERSION,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        scoreSubmitted = true;
-        submissionMessage.textContent = '登録しました！';
-        submissionMessage.className = 'mt-2 h-5 text-green-600 font-bold';
-        checkAndUnlockAchievements('ranking', { score: totalScore, name: playerName });
-
-    } catch (error) {
-        console.error("Error adding document: ", error);
-        submissionMessage.textContent = '登録に失敗しました。';
-        submissionMessage.className = 'mt-2 h-5 text-red-600';
-        submitScoreButton.disabled = false;
-    }
-}
-
 function escapeHTML(str) {
     const p = document.createElement("p");
     p.textContent = str;
@@ -1325,14 +1189,6 @@ cancelResetButton.addEventListener('click', () => {
     resetConfirmationModal.classList.add('hidden');
 });
 
-// ランキング関連のイベントリスナー
-rankingButton.addEventListener('click', showRanking);
-closeRankingModalButton.addEventListener('click', () => {
-    rankingModal.classList.add('hidden');
-});
-scoreSubmissionForm.addEventListener('submit', submitScore);
-
-
 document.querySelectorAll('.game-button').forEach(button => {
     button.addEventListener('mouseenter', () => playSE(sounds.se.b1));
 });
@@ -1355,12 +1211,6 @@ function initGame() {
         startScreen.classList.remove('hidden');
         // playBGM(sounds.bgm.oped); // BGM再生をユーザーの初回クリック時に限定するため削除
         setupTitleScreenEffects(); // タイトル画面エフェクトを初期化
-    }
-
-    if (!db) {
-        rankingButton.disabled = true;
-        rankingButton.style.cursor = 'not-allowed';
-        rankingButton.style.opacity = '0.5';
     }
 }
 
