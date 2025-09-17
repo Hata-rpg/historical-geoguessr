@@ -1,0 +1,366 @@
+/* カスタムスタイル */
+body {
+    font-family: 'Noto Serif JP', serif;
+    background-image: url('https://www.transparenttextures.com/patterns/old-wall.png'), url('https://www.transparenttextures.com/patterns/paper.png');
+    background-color: #f5eeda; /* 羊皮紙のような色 */
+    color: #4a2c2a;
+}
+
+body.vignette-active::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* 中央の明るい範囲を広げ、周辺の暗さを少し調整 */
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0) 50%, rgba(0,0,0,0.6) 100%);
+    pointer-events: none;
+    z-index: 5;
+}
+
+
+.parchment {
+    background-color: rgba(245, 238, 218, 0.8);
+    border: 2px solid #c8bda4;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+.game-button {
+    background-color: #8b4513; /* サドルブラウン */
+    color: #f5eeda;
+    border: 2px solid #5a2d0c;
+    box-shadow: 0 4px #5a2d0c;
+    transition: all 0.1s ease-in-out;
+}
+
+.game-button:hover {
+    background-color: #a0522d; /* シエンナ */
+    transform: translateY(-2px);
+    box-shadow: 0 6px #5a2d0c;
+}
+
+.game-button:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px #5a2d0c;
+}
+
+.game-button:disabled {
+    background-color: #9d8a7a;
+    box-shadow: 0 4px #7c6c5a;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+    cursor: crosshair;
+    filter: sepia(0.7);
+}
+
+#map.time-attack-map {
+    filter: grayscale(1);
+}
+
+.leaflet-container {
+    background: #aad3df;
+}
+
+#narrative-box {
+    letter-spacing: 0.1px; /* for html2canvas rendering consistency */
+}
+
+/* --- コンパスのスタイル --- */
+#compass {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, #fdfaf2 60%, #e9e2d0 100%);
+    border-radius: 50%;
+    border: 2px solid #a4886d;
+    z-index: 1000;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bold;
+    color: #5a2d0c;
+}
+#compass-needle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    transform: rotate(0deg);
+}
+#compass-needle::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 34px solid #e74c3c;
+}
+#compass-needle::after {
+    content: '';
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 34px solid #f5eeda;
+}
+.compass-label-n, .compass-label-e, .compass-label-s, .compass-label-w {
+    position: absolute;
+    font-size: 14px;
+}
+.compass-label-n { top: 2px; left: 50%; transform: translateX(-50%); }
+.compass-label-s { bottom: 2px; left: 50%; transform: translateX(-50%); }
+.compass-label-e { right: 5px; top: 50%; transform: translateY(-50%); }
+.compass-label-w { left: 5px; top: 50%; transform: translateY(-50%); }
+
+/* --- 実績通知のスタイル --- */
+#notification-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 4000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.achievement-toast {
+    background-color: #8b4513;
+    color: #f5eeda;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 2px solid #5a2d0c;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    opacity: 0;
+    transform: translateX(100%);
+    animation: slideInAndOut 5s forwards;
+}
+.achievement-toast i {
+    font-size: 2em;
+    color: #ffd700; /* Gold */
+}
+@keyframes slideInAndOut {
+    0% { opacity: 0; transform: translateX(100%); }
+    15% { opacity: 1; transform: translateX(0); }
+    85% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(100%); }
+}
+
+/* --- 音量スライダーのスタイル --- */
+input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    cursor: pointer;
+    background: #a4886d;
+    border-radius: 5px;
+    border: 1px solid #5a2d0c;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #8b4513;
+    cursor: pointer;
+    margin-top: -7px; /* 親要素の中央に配置 */
+    border: 2px solid #5a2d0c;
+}
+
+input[type=range]::-moz-range-track {
+    width: 100%;
+    height: 8px;
+    cursor: pointer;
+    background: #a4886d;
+    border-radius: 5px;
+    border: 1px solid #5a2d0c;
+}
+
+input[type=range]::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #8b4513;
+    cursor: pointer;
+    border: 2px solid #5a2d0c;
+}
+
+/* --- SNS共有ボタンのスタイル --- */
+.share-icon-button {
+    background-color: #a4886d;
+    color: #f5eeda;
+    border-radius: 50%;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #5a2d0c;
+}
+.share-icon-button:hover {
+    transform: scale(1.1);
+    color: white;
+    background-color: #5a2d0c; /* 汎用的なホバー色 */
+    border-color: #4a2c2a;
+}
+
+/* --- ランキングとスコア登録のスタイル --- */
+.name-input::placeholder {
+    color: #a4886d;
+}
+
+.loader {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #8b4513; /* SaddleBrown */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* --- タイトル画面エフェクト --- */
+#start-screen-background {
+    position: fixed;
+    top: -50px;
+    left: -50px;
+    right: -50px;
+    bottom: -50px;
+    z-index: 0;
+}
+
+.bg-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.3s ease-out;
+}
+
+.layer-1 { background-image: url('https://www.transparenttextures.com/patterns/old-wall.png'); }
+.layer-2 { background-image: url('https://www.transparenttextures.com/patterns/paper.png'); opacity: 0.6; }
+.layer-3 { background-image: url('https://www.transparenttextures.com/patterns/worn-dots.png'); opacity: 0.2; }
+.layer-4 { background-image: url('https://www.transparenttextures.com/patterns/subtle-grunge.png'); opacity: 0.1; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.title-fade-in {
+    animation: fadeIn 0.8s backwards cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+#particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1; /* ビネットより下に配置 */
+}
+
+/* --- コンテンツエリアをビネットの上に表示させる --- */
+#game-container {
+    position: relative; /* z-indexを適用するため */
+    z-index: 10; /* ビネット(z-index: 5)より手前に */
+}
+
+/* --- ストーリーログ画面で選択されたアイテムのスタイル --- */
+#story-list-container .bg-yellow-200 {
+    background-color: #fefcbf; /* Tailwindのyellow-200に近い色 */
+    border: 2px solid #fcd34d; /* Tailwindのyellow-400に近い色 */
+}
+
+/* --- フッターと必須ページ用モーダルのスタイル --- */
+#footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(139, 69, 19, 0.8); /* #8b4513 with transparency */
+    text-align: center;
+    padding: 8px 0;
+    z-index: 2000;
+    color: #f5eeda;
+    font-size: 0.875rem;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+}
+
+.legal-modal {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+/* --- Pre-start Screen Fix --- */
+/* コンテナ自体を画面全体に固定表示させ、親要素のpadding等に影響されないようにします */
+#pre-start-screen {
+    position: fixed !important; /* HTMLのrelativeクラスを上書き */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* --- Pre-start Screen Girl Image --- */
+#pre-start-girl {
+    position: absolute;
+    /* フッターの高さ(約37px)を考慮して、ビューポート下部からの位置を決定 */
+    bottom: 37px;
+    left: 50%;
+    height: 95vh;
+    max-width: 90vw;
+    object-fit: contain;
+    opacity: 0;
+    animation: fadeInBg 2s 0.5s forwards ease-out;
+    pointer-events: none;
+}
+
+@keyframes fadeInBg {
+    from {
+        opacity: 0;
+        /* 水平方向の中央揃えと、開始時のスケールアップ */
+        transform: translate(-50%, 0) scale(1.05); 
+    }
+    to {
+        opacity: 0.15;
+        /* 水平方向の中央揃え */
+        transform: translate(-50%, 0) scale(1);
+    }
+}
