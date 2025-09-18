@@ -826,15 +826,15 @@ async function shareResult(type) {
     }
 
     // --- 共有用テキストを作成 ---
-    const hashtag = 'ヒストリカル・ジオゲッサー';
+    const hashtag = 'ヒストリカル・ゲッサー';
     let text = '';
     if (type === 'chapter' && gameMode === 'story') {
         const lastResult = chapterResults[chapterResults.length - 1];
-        text = `【ヒストリカル・ジオゲッサー】\n「${lastResult.title}」で ${lastResult.score.toLocaleString()}点 獲得！\n正解との距離は ${lastResult.distance.toFixed(0)}km でした！\n#${hashtag}`;
+        text = `【ヒストリカル・ゲッサー】\n「${lastResult.title}」で ${lastResult.score.toLocaleString()}点 獲得！\n正解との距離は ${lastResult.distance.toFixed(0)}km でした！\n#${hashtag}`;
     } else if (type === 'final' && gameMode === 'story') {
-         text = `【ヒストリカル・ジオゲッサー】\nストーリーモード「${currentStory.title}」をクリア！\n合計スコアは ${totalScore.toLocaleString()}点 でした！\n#${hashtag}`;
+         text = `【ヒストリカル・ゲッサー】\nストーリーモード「${currentStory.title}」をクリア！\n合計スコアは ${totalScore.toLocaleString()}点 でした！\n#${hashtag}`;
     } else if (type === 'final' && gameMode === 'timeAttack') {
-        text = `【ヒストリカル・ジオゲッサー】\nタイムアタックに挑戦！\nスコアは ${totalScore.toLocaleString()}点 でした！\n#${hashtag}`;
+        text = `【ヒストリカル・ゲッサー】\nタイムアタックに挑戦！\nスコアは ${totalScore.toLocaleString()}点 でした！\n#${hashtag}`;
     }
 
     // --- スクリーンショット用のフィルター適用 ---
@@ -1235,3 +1235,4 @@ function loadVolumeSettings() {
 loadGameData();
 loadVolumeSettings();
 initGame();
+
